@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLMigrationAssistant.API", "SQLMigrationAssistant\SQLMigrationAssistant.API.csproj", "{86DCC24A-A474-44AE-A94A-35AD5256A6F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4C46EC7C-0F93-4F88-9E81-D37A732B8B2F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{8DB0207A-CEF9-4734-B2C1-283C218B7CB5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{F61A6A9D-4833-49A2-BA70-9042763AEDB0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{47D116B6-9770-42C1-B9A9-4086A070E924}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLMigrationAssistant.Application", "SQLMigrationAssistant.Application\SQLMigrationAssistant.Application.csproj", "{D836A614-EC44-428D-9D86-ADEA947F2AFC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLMigrationAssistant.Domain", "SQLMigrationAssistant.Domain\SQLMigrationAssistant.Domain.csproj", "{A2C2E725-7C86-4F04-88E3-AC5E2EFB7166}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLMigrationAssistant.Infrastructure", "SQLMigrationAssistant.Infrastructure\SQLMigrationAssistant.Infrastructure.csproj", "{CE34DBF1-C15C-4D8F-98D1-9E5D08EF8295}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E3D83C98-FE32-447F-A98C-D9318E324C4A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{86DCC24A-A474-44AE-A94A-35AD5256A6F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86DCC24A-A474-44AE-A94A-35AD5256A6F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86DCC24A-A474-44AE-A94A-35AD5256A6F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86DCC24A-A474-44AE-A94A-35AD5256A6F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D836A614-EC44-428D-9D86-ADEA947F2AFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D836A614-EC44-428D-9D86-ADEA947F2AFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D836A614-EC44-428D-9D86-ADEA947F2AFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D836A614-EC44-428D-9D86-ADEA947F2AFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2C2E725-7C86-4F04-88E3-AC5E2EFB7166}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2C2E725-7C86-4F04-88E3-AC5E2EFB7166}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2C2E725-7C86-4F04-88E3-AC5E2EFB7166}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2C2E725-7C86-4F04-88E3-AC5E2EFB7166}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE34DBF1-C15C-4D8F-98D1-9E5D08EF8295}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE34DBF1-C15C-4D8F-98D1-9E5D08EF8295}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE34DBF1-C15C-4D8F-98D1-9E5D08EF8295}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE34DBF1-C15C-4D8F-98D1-9E5D08EF8295}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{86DCC24A-A474-44AE-A94A-35AD5256A6F1} = {47D116B6-9770-42C1-B9A9-4086A070E924}
+		{8DB0207A-CEF9-4734-B2C1-283C218B7CB5} = {4C46EC7C-0F93-4F88-9E81-D37A732B8B2F}
+		{F61A6A9D-4833-49A2-BA70-9042763AEDB0} = {4C46EC7C-0F93-4F88-9E81-D37A732B8B2F}
+		{47D116B6-9770-42C1-B9A9-4086A070E924} = {4C46EC7C-0F93-4F88-9E81-D37A732B8B2F}
+		{D836A614-EC44-428D-9D86-ADEA947F2AFC} = {8DB0207A-CEF9-4734-B2C1-283C218B7CB5}
+		{A2C2E725-7C86-4F04-88E3-AC5E2EFB7166} = {8DB0207A-CEF9-4734-B2C1-283C218B7CB5}
+		{CE34DBF1-C15C-4D8F-98D1-9E5D08EF8295} = {F61A6A9D-4833-49A2-BA70-9042763AEDB0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C06EBA7C-A163-4865-B4BF-2F4276D76716}
+	EndGlobalSection
+EndGlobal
