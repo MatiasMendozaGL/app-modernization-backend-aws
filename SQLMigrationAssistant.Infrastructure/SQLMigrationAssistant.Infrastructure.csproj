@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="output_example.txt" />
     <EmbeddedResource Include="Prompts\CodeGeneration_Template_Prompt.txt" />
     <EmbeddedResource Include="Prompts\DotNet_Instructions.txt" />
     <EmbeddedResource Include="Prompts\Java_Instructions.txt" />
