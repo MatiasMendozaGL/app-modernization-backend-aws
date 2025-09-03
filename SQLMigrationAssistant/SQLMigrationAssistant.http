@@ -1,0 +1,23 @@
+@SQLMigrationAssistant_HostAddress = https://localhost:7097
+@MigrationId = 1
+
+# Health
+GET {{SQLMigrationAssistant_HostAddress}}/health
+Accept: application/json
+
+### Login
+POST {{SQLMigrationAssistant_HostAddress}}/api/v1/Auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "Password123!"
+}
+
+### Get list of migrations
+GET {{SQLMigrationAssistant_HostAddress}}/api/v1/Migrations
+# Authorization: Bearer {{accessToken}}
+
+### Get migration details by id
+GET {{SQLMigrationAssistant_HostAddress}}/api/v1/Migrations/{{migrationId}}
+# Authorization: Bearer {{accessToken}}
