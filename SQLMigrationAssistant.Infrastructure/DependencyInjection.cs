@@ -60,7 +60,7 @@ namespace SQLMigrationAssistant.Infrastructure
 
         private static IServiceCollection AddFileServices(this IServiceCollection services)
         {
-            //services.AddSingleton<IFileStorageService, CloudStorageService>();
+            services.AddSingleton<IFileStorageService, CloudStorageService>();
             services.AddScoped<IFileContentReader, StreamFileContentReader>();
             services.AddScoped<IMigrationRepository<Migration>, CloudStorageMigrationRepository>();
             return services;
@@ -70,7 +70,7 @@ namespace SQLMigrationAssistant.Infrastructure
         {
             services.Configure<VertexAiSettings>(configuration.GetSection(VertexAiSettings.SectionName));
             services.Configure<RetrySettings>(configuration.GetSection(RetrySettings.SectionName));
-            services.AddGoogleCloudStorage(configuration);
+            services.AddAmazonS3Storage(configuration);
 
             return services;
         }
@@ -158,34 +158,12 @@ namespace SQLMigrationAssistant.Infrastructure
             return services;
         }
 
-        private static IServiceCollection AddGoogleCloudStorage(this IServiceCollection services, IConfiguration configuration)
+        private static IServiceCollection AddAmazonS3Storage(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<CloudStorageSettings>(options =>
-            {
-                configuration.GetSection(CloudStorageSettings.SectionName).Bind(options);
-                ValidateAndConfigureCloudStorage(options);
-            });
+            services.AddDefaultAWSOptions(configuration.GetAWSOptions());
 
-            //services.AddSingleton<StorageClient>(_ => StorageClient.Create());
+            services.AddAWSService<Amazon.S3.IAmazonS3>();
             return services;
-        }
-
-        private static void ValidateAndConfigureCloudStorage(CloudStorageSettings options)
-        {
-            if (string.IsNullOrEmpty(options.BucketName))
-            {
-                throw new InvalidOperationException("CloudStorageSettings.BucketName is required");
-            }
-
-            if (options.MaxFileSizeMB <= 0)
-            {
-                options.MaxFileSizeMB = 50; // Default value
-            }
-
-            if (!string.IsNullOrEmpty(options.CredentialsPath))
-            {
-                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", options.CredentialsPath);
-            }
         }
     }
 }

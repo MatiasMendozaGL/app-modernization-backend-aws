@@ -1,12 +1,9 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Http.Json;
 using Microsoft.OpenApi.Models;
 using SQLMigrationAssistant.API.Filters;
 using SQLMigrationAssistant.API.Mapping;
-using SQLMigrationAssistant.API.Validators;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Text.Json.Serialization;
 
 namespace SQLMigrationAssistant.API
 {

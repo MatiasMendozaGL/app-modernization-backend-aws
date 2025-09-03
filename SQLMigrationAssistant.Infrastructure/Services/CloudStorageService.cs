@@ -1,293 +1,327 @@
-﻿//using Microsoft.AspNetCore.StaticFiles;
-//using Microsoft.Extensions.Logging;
-//using Microsoft.Extensions.Options;
-//using SQLMigrationAssistant.Application.Common.Exceptions;
-//using SQLMigrationAssistant.Application.Common.Interfaces;
-//using SQLMigrationAssistant.Infrastructure.Settings;
-//using System.Text;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using SQLMigrationAssistant.Application.Common.Exceptions;
+using SQLMigrationAssistant.Application.Common.Interfaces;
+using SQLMigrationAssistant.Infrastructure.Settings;
+using System.Text;
 
-//namespace SQLMigrationAssistant.Infrastructure.Services
-//{
-//    public class CloudStorageService : IFileStorageService
-//    {
-//        //private readonly StorageClient _storageClient;
-//        private readonly ILogger<CloudStorageService> _logger;
-//        private readonly string _bucketName;
-//        private readonly FileExtensionContentTypeProvider _contentTypeProvider;
-//        private readonly IRetryPolicy _retryPolicy;
+namespace SQLMigrationAssistant.Infrastructure.Services
+{
+    public class CloudStorageService : IFileStorageService
+    {
+        private readonly IAmazonS3 _s3Client;
+        private readonly ILogger<CloudStorageService> _logger;
+        private readonly string _bucketName;
+        private readonly FileExtensionContentTypeProvider _contentTypeProvider;
+        private readonly IRetryPolicy _retryPolicy;
 
-//        public CloudStorageService(StorageClient storageClient, IOptions<CloudStorageSettings> cloudSettings,
-//                                    ILogger<CloudStorageService> logger, IRetryPolicy retryPolicy)
-//        {
-//            //_storageClient = storageClient;
-//            _bucketName = cloudSettings.Value.BucketName;
-//            _logger = logger;
-//            _contentTypeProvider = new FileExtensionContentTypeProvider();
-//            _retryPolicy = retryPolicy;
-//        }
+        public CloudStorageService(IAmazonS3 s3Client, IOptions<CloudStorageSettings> s3Settings,
+                                ILogger<CloudStorageService> logger, IRetryPolicy retryPolicy)
+        {
+            _s3Client = s3Client;
+            _bucketName = s3Settings.Value.BucketName;
+            _logger = logger;
+            _contentTypeProvider = new FileExtensionContentTypeProvider();
+            _retryPolicy = retryPolicy;
+        }
 
-//        /// <summary>
-//        /// Tests connectivity by attempting to list a small number of objects in the configured bucket.
-//        /// This requires 'storage.objects.list' permission.
-//        /// </summary>
-//        /// <returns>True if connectivity is successful, false otherwise.</returns>
-//        public async Task<bool> IsServiceAvailableAsync()
-//        {
-//            try
-//            {
-//                return await _retryPolicy.ExecuteAsync(async () =>
-//                {
-//                    // Test bucket access by listing objects with a limit
-//                    var objects = _storageClient.ListObjects(_bucketName, options: new ListObjectsOptions { PageSize = 1 });
-//                    var objectCount = objects.Take(1).Count(); // Just test if we can access the bucket
+        /// <summary>
+        /// Tests connectivity by attempting to list a small number of objects in the configured S3 bucket.
+        /// This requires 's3:ListBucket' permission.
+        /// </summary>
+        /// <returns>True if connectivity is successful, false otherwise.</returns>
+        public async Task<bool> IsServiceAvailableAsync()
+        {
+            try
+            {
+                return await _retryPolicy.ExecuteAsync(async () =>
+                {
+                    // Test bucket access by listing objects with a limit
+                    var request = new ListObjectsV2Request
+                    {
+                        BucketName = _bucketName,
+                        MaxKeys = 1
+                    };
+                    await _s3Client.ListObjectsV2Async(request);
 
-//                    _logger.LogInformation("Successfully connected to bucket {BucketName}! Service is available.", _bucketName);
-//                    return true;
-//                });
-//            }
-//            catch (Exception ex)
-//            {
-//                _logger.LogError(ex, "Error testing connectivity to bucket {BucketName} after retry attempts", _bucketName);
-//                return false;
-//            }
-//        }
+                    _logger.LogInformation("Successfully connected to S3 bucket {BucketName}! Service is available.", _bucketName);
+                    return true;
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error testing connectivity to S3 bucket {BucketName} after retry attempts", _bucketName);
+                return false;
+            }
+        }
 
-//        /// <summary>
-//        /// Upload file content to GCP bucket
-//        /// </summary>
-//        /// <param name="content">file content to upload</param>
-//        /// <param name="fileName">Name for the file in the bucket</param>
-//        /// <param name="contentType">MIME type (defaults to text/plain)</param>
-//        /// <returns>The uploaded file name</returns>
-//        public async Task<string> UploadFileAsync(string content, string fileName, string contentType)
-//        {
-//            try
-//            {
-//                return await _retryPolicy.ExecuteAsync(async () =>
-//                {
-//                    var bytes = Encoding.UTF8.GetBytes(content);
-//                    using var stream = new MemoryStream(bytes);
+        /// <summary>
+        /// Upload file content to an S3 bucket
+        /// </summary>
+        /// <param name="content">File content to upload</param>
+        /// <param name="fileName">The key (path/name) for the file in the bucket</param>
+        /// <param name="contentType">MIME type</param>
+        /// <returns>The uploaded file key</returns>
+        public async Task<string> UploadFileAsync(string content, string fileName, string contentType)
+        {
+            try
+            {
+                return await _retryPolicy.ExecuteAsync(async () =>
+                {
+                    var bytes = Encoding.UTF8.GetBytes(content);
+                    using var stream = new MemoryStream(bytes);
 
-//                    var uploadedObject = await _storageClient.UploadObjectAsync(
-//                        _bucketName,
-//                        fileName,
-//                        contentType,
-//                        stream);
+                    var request = new PutObjectRequest
+                    {
+                        BucketName = _bucketName,
+                        Key = fileName,
+                        ContentType = contentType,
+                        InputStream = stream
+                    };
 
-//                    _logger.LogInformation("Text content uploaded to {BucketName}/{FileName}", _bucketName, fileName);
-//                    return uploadedObject.Name;
-//                });
-//            }
-//            catch (Exception ex)
-//            {
-//                _logger.LogError(ex, "Error uploading text content to {FileName} after retry attempts", fileName);
-//                throw;
-//            }
-//        }
+                    await _s3Client.PutObjectAsync(request);
 
-//        /// <summary>
-//        /// Get files by a prefix in the bucket
-//        /// </summary>
-//        /// <param name="prefix">Optional prefix to filter files</param>
-//        /// <returns>List of file names</returns>
-//        public async Task<IEnumerable<string>> GetFilesByPrefixAsync(string? prefix = null)
-//        {
-//            if (string.IsNullOrWhiteSpace(prefix))
-//            {
-//                return [];
-//            }
+                    _logger.LogInformation("Text content uploaded to {BucketName}/{FileName}", _bucketName, fileName);
+                    return fileName;
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading text content to {FileName} in S3 after retry attempts", fileName);
+                throw;
+            }
+        }
 
-//            try
-//            {
-//                return await _retryPolicy.ExecuteAsync(async () =>
-//                {
-//                    var objects = _storageClient.ListObjectsAsync(_bucketName, prefix);
-//                    var objectNames = new List<string>();
+        /// <summary>
+        /// Get files by a prefix in the S3 bucket
+        /// </summary>
+        /// <param name="prefix">Optional prefix to filter files</param>
+        /// <returns>List of file keys</returns>
+        public async Task<IEnumerable<string>> GetFilesByPrefixAsync(string? prefix = null)
+        {
+            if (string.IsNullOrWhiteSpace(prefix))
+            {
+                return [];
+            }
 
-//                    await foreach (var obj in objects)
-//                    {
-//                        objectNames.Add(obj.Name);
-//                    }
+            try
+            {
+                return await _retryPolicy.ExecuteAsync(async () =>
+                {
+                    var objectNames = new List<string>();
+                    var request = new ListObjectsV2Request
+                    {
+                        BucketName = _bucketName,
+                        Prefix = prefix
+                    };
 
-//                    _logger.LogInformation("Listed {Count} files with prefix {Prefix} from bucket {BucketName}",
-//                        objectNames.Count, prefix, _bucketName);
+                    ListObjectsV2Response response;
+                    do
+                    {
+                        response = await _s3Client.ListObjectsV2Async(request);
+                        objectNames.AddRange(response.S3Objects.Select(o => o.Key));
+                        request.ContinuationToken = response.NextContinuationToken;
+                    } while (response.IsTruncated != null && response.IsTruncated.Value);
 
-//                    return (IEnumerable<string>)objectNames;
-//                });
-//            }
-//            catch (Exception ex)
-//            {
-//                _logger.LogError(ex, "Error listing files in bucket {BucketName} with prefix {Prefix} after retry attempts",
-//                    _bucketName, prefix);
-//                throw;
-//            }
-//        }
+                    _logger.LogInformation("Listed {Count} files with prefix {Prefix} from S3 bucket {BucketName}",
+                        objectNames.Count, prefix, _bucketName);
 
-//        public async Task<byte[]> GetFileAsync(string fileName, CancellationToken cancellationToken = default)
-//        {
-//            try
-//            {
-//                _logger.LogInformation("Downloading file from GCP Storage. Bucket: {BucketName}, File: {FileName}",
-//                    _bucketName, fileName);
+                    return objectNames;
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error listing files in S3 bucket {BucketName} with prefix {Prefix} after retry attempts",
+                    _bucketName, prefix);
+                throw;
+            }
+        }
 
-//                return await _retryPolicy.ExecuteAsync(async () =>
-//                {
-//                    using var memoryStream = new MemoryStream();
-//                    await _storageClient.DownloadObjectAsync(_bucketName, fileName, memoryStream, cancellationToken: cancellationToken);
+        /// <summary>
+        /// Downloads a file from S3.
+        /// </summary>
+        public async Task<byte[]> GetFileAsync(string fileName, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Downloading file from S3. Bucket: {BucketName}, File: {FileName}",
+                    _bucketName, fileName);
 
-//                    var content = memoryStream.ToArray();
-//                    _logger.LogInformation("Successfully downloaded file {FileName}. Size: {Size} bytes", fileName, content.Length);
+                return await _retryPolicy.ExecuteAsync(async () =>
+                {
+                    using var response = await _s3Client.GetObjectAsync(_bucketName, fileName, cancellationToken);
+                    using var memoryStream = new MemoryStream();
+                    await response.ResponseStream.CopyToAsync(memoryStream, cancellationToken);
 
-//                    return content;
-//                });
-//            }
-//            catch (Exception ex)
-//            {
-//                _logger.LogError(ex, "Error downloading file from GCP Storage. Bucket: {BucketName}, File: {FileName} after retry attempts",
-//                    _bucketName, fileName);
-//                throw;
-//            }
-//        }
+                    var content = memoryStream.ToArray();
+                    _logger.LogInformation("Successfully downloaded file {FileName}. Size: {Size} bytes", fileName, content.Length);
 
-//        public async Task<byte[]> SearchAndGetFileAsync(string fileName, CancellationToken cancellationToken = default)
-//        {
-//            try
-//            {
-//                _logger.LogInformation("Downloading file from GCP Storage. Bucket: {BucketName}, File: {FileName}",
-//                    _bucketName, fileName);
+                    return content;
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading file from S3. Bucket: {BucketName}, File: {FileName} after retry attempts",
+                    _bucketName, fileName);
+                throw;
+            }
+        }
 
-//                var foundFileName = await FindFileByNameAsync(fileName, cancellationToken);
+        /// <summary>
+        /// Deletes all objects under a specified "directory" prefix in S3.
+        /// </summary>
+        public async Task DeleteDirectoryAsync(string directoryPath)
+        {
+            try
+            {
+                // Ensure the prefix ends with a '/' to avoid deleting unintended files.
+                var directoryPrefix = directoryPath.EndsWith("/") ? directoryPath : $"{directoryPath}/";
+                var allKeys = (await GetFilesByPrefixAsync(directoryPrefix)).ToList();
 
-//                return await _retryPolicy.ExecuteAsync(async () =>
-//                {
-//                    using var memoryStream = new MemoryStream();
-//                    await _storageClient.DownloadObjectAsync(_bucketName, foundFileName, memoryStream, cancellationToken: cancellationToken);
+                if (!allKeys.Any())
+                {
+                    _logger.LogInformation("No files found in directory {DirectoryPath} to delete.", directoryPath);
+                    return;
+                }
 
-//                    var content = memoryStream.ToArray();
-//                    _logger.LogInformation("Successfully downloaded file {FileName}. Size: {Size} bytes", fileName, content.Length);
+                // S3 can delete up to 1000 objects in a single request.
+                foreach (var chunk in allKeys.Chunk(1000))
+                {
+                    var deleteRequest = new DeleteObjectsRequest
+                    {
+                        BucketName = _bucketName,
+                        Objects = chunk.Select(key => new KeyVersion { Key = key }).ToList()
+                    };
 
-//                    return content;
-//                });
-//            }
-//            catch (Exception ex)
-//            {
-//                _logger.LogError(ex, "Error downloading file from GCP Storage. Bucket: {BucketName}, File: {FileName} after retry attempts",
-//                    _bucketName, fileName);
-//                throw;
-//            }
-//        }
+                    await _s3Client.DeleteObjectsAsync(deleteRequest);
+                }
+                _logger.LogInformation("Successfully deleted {Count} objects from directory {DirectoryPath}", allKeys.Count, directoryPath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error trying to delete S3 directory: {DirectoryPath}", directoryPath);
+                throw new CloudStorageException("The S3 directory could not be accessed for deletion", ex);
+            }
+        }
 
-//        public string GetContentType(string filename)
-//        {
-//            if (!_contentTypeProvider.TryGetContentType(filename, out string contentType))
-//            {
-//                contentType = "application/octet-stream";
-//            }
-//            return contentType;
-//        }
+        // NO CHANGES NEEDED FOR THE METHODS BELOW
+        // These methods call the ones above, so their logic remains the same.
 
-//        public async Task DeleteDirectoryAsync(string directoryPath)
-//        {
-//            try
-//            {
-//                var directoryPrefix = directoryPath.EndsWith("/") ? directoryPath : $"{directoryPath}/";
-//                await foreach (var storageObject in _storageClient.ListObjectsAsync(_bucketName, directoryPrefix))
-//                {
-//                    await _storageClient.DeleteObjectAsync(_bucketName, storageObject.Name);
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                _logger.LogError(ex, "Error trying to delete directory: {DirectoryPath}", directoryPath);
+        public async Task<byte[]> SearchAndGetFileAsync(string fileName, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Searching for and downloading file from S3. Bucket: {BucketName}, File: {FileName}",
+                    _bucketName, fileName);
 
-//                throw new CloudStorageException("The directory could not be accessed for deletion", ex);
-//            }
-//        }
+                var foundFileName = await FindFileByNameAsync(fileName, cancellationToken);
 
-//        /// <summary>
-//        /// Finds a file by name. Returns the first match found.
-//        /// </summary>
-//        /// <param name="filePath">The file path</param>
-//        /// <param name="cancellationToken">Cancellation token</param>
-//        /// <returns>The full filename with extension, or null if not found</returns>
-//        private async Task<string?> FindFileByNameAsync(string filePath, CancellationToken cancellationToken = default)
-//        {
-//            if (string.IsNullOrWhiteSpace(filePath))
-//                return null;
+                return await GetFileAsync(foundFileName, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading file from S3. Bucket: {BucketName}, File: {FileName} after retry attempts",
+                    _bucketName, fileName);
+                throw;
+            }
+        }
 
-//            try
-//            {
-//                var fileName = Path.GetFileNameWithoutExtension(filePath);
-//                return await _retryPolicy.ExecuteAsync(async () =>
-//                {
-//                    var objects = _storageClient.ListObjectsAsync(_bucketName, filePath);
+        public string GetContentType(string filename)
+        {
+            if (!_contentTypeProvider.TryGetContentType(filename, out string contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
+        }
 
-//                    await foreach (var obj in objects.WithCancellation(cancellationToken))
-//                    {
-//                        var currentFileName = Path.GetFileNameWithoutExtension(obj.Name);
-//                        if (string.Equals(currentFileName, fileName, StringComparison.OrdinalIgnoreCase))
-//                        {
-//                            _logger.LogInformation("Found file {FullFileName} for search term {SearchTerm}",
-//                                obj.Name, filePath);
-//                            return obj.Name;
-//                        }
-//                    }
+        private async Task<string?> FindFileByNameAsync(string filePath, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+                return null;
 
-//                    _logger.LogWarning("No file found matching {SearchTerm} in bucket {BucketName}",
-//                        filePath, _bucketName);
-//                    throw new FileNotFoundException(Path.GetFileName(filePath));
-//                });
-//            }
-//            catch (Exception ex)
-//            {
-//                _logger.LogError(ex, "Error searching for file {SearchTerm} in bucket {BucketName} after retry attempts",
-//                    filePath, _bucketName);
-//                throw;
-//            }
-//        }
+            try
+            {
+                var fileName = Path.GetFileNameWithoutExtension(filePath);
+                return await _retryPolicy.ExecuteAsync(async () =>
+                {
+                    var request = new ListObjectsV2Request
+                    {
+                        BucketName = _bucketName,
+                        Prefix = filePath
+                    };
 
-//        /// <summary>
-//        /// Downloads multiple files efficiently in parallel for ZIP creation
-//        /// </summary>
-//        /// <param name="fileNames">List of file names to download</param>
-//        /// <param name="cancellationToken">Cancellation token</param>
-//        /// <returns>Dictionary mapping file names to their content</returns>
-//        public async Task<Dictionary<string, byte[]>> GetMultipleFilesAsync(IEnumerable<string> fileNames, CancellationToken cancellationToken = default)
-//        {
-//            var result = new Dictionary<string, byte[]>();
-//            var downloadTasks = new List<Task>();
-//            var semaphore = new SemaphoreSlim(10); // Limit concurrent downloads to 10
+                    ListObjectsV2Response response;
+                    do
+                    {
+                        response = await _s3Client.ListObjectsV2Async(request, cancellationToken);
+                        foreach (var obj in response.S3Objects)
+                        {
+                            var currentFileName = Path.GetFileNameWithoutExtension(obj.Key);
+                            if (string.Equals(currentFileName, fileName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                _logger.LogInformation("Found file {FullFileName} for search term {SearchTerm}",
+                                    obj.Key, filePath);
 
-//            foreach (var fileName in fileNames)
-//            {
-//                downloadTasks.Add(DownloadFileWithSemaphore(fileName, result, semaphore, cancellationToken));
-//            }
+                                return obj.Key;
+                            }
+                        }
+                        request.ContinuationToken = response.NextContinuationToken;
 
-//            await Task.WhenAll(downloadTasks);
-//            return result;
-//        }
+                    } while (response.IsTruncated != null && response.IsTruncated.Value);
 
-//        private async Task DownloadFileWithSemaphore(string fileName, Dictionary<string, byte[]> result,
-//            SemaphoreSlim semaphore, CancellationToken cancellationToken)
-//        {
-//            await semaphore.WaitAsync(cancellationToken);
-//            try
-//            {
-//                var content = await GetFileAsync(fileName, cancellationToken);
-//                lock (result)
-//                {
-//                    result[fileName] = content;
-//                }
-//            }
-//            catch (Exception ex)
-//            {
-//                _logger.LogError(ex, "Failed to download file {FileName} for bulk operation", fileName);
-//                // Don't fail the entire operation for one file
-//            }
-//            finally
-//            {
-//                semaphore.Release();
-//            }
-//        }
-//    }
-//}
+                    _logger.LogWarning("No file found matching {SearchTerm} in S3 bucket {BucketName}",
+                        filePath, _bucketName);
+                    throw new FileNotFoundException(Path.GetFileName(filePath));
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching for file {SearchTerm} in S3 bucket {BucketName} after retry attempts",
+                    filePath, _bucketName);
+                throw;
+            }
+        }
+
+        public async Task<Dictionary<string, byte[]>> GetMultipleFilesAsync(IEnumerable<string> fileNames, CancellationToken cancellationToken = default)
+        {
+            var result = new Dictionary<string, byte[]>();
+            var downloadTasks = new List<Task>();
+            var semaphore = new SemaphoreSlim(10); // Limit concurrent downloads
+
+            foreach (var fileName in fileNames)
+            {
+                downloadTasks.Add(DownloadFileWithSemaphore(fileName, result, semaphore, cancellationToken));
+            }
+
+            await Task.WhenAll(downloadTasks);
+            return result;
+        }
+
+        private async Task DownloadFileWithSemaphore(string fileName, Dictionary<string, byte[]> result,
+            SemaphoreSlim semaphore, CancellationToken cancellationToken)
+        {
+            await semaphore.WaitAsync(cancellationToken);
+            try
+            {
+                var content = await GetFileAsync(fileName, cancellationToken);
+                lock (result)
+                {
+                    result[fileName] = content;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to download file {FileName} for bulk operation", fileName);
+                // Don't fail the entire operation for one file
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+        }
+    }
+}
