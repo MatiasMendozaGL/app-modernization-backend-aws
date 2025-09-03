@@ -1,0 +1,26 @@
+﻿### Project Build File Generation
+Generate the `pom.xml` file necessary to build and run the application using Apache Maven.
+
+* **Project File (`pom.xml`)**
+    * **Path:** `pom.xml`
+    * **Content:** Use `spring-boot-starter-parent`, set the Java version to 17 or higher, and define metadata like `groupId` and `artifactId`. Include dependencies for `spring-boot-starter-web`, `spring-boot-starter-data-jpa`, `spring-boot-starter-validation`, `springdoc-openapi-starter-webmvc-ui`, a suitable JDBC driver, and `lombok`.
+
+### Application Configuration and Startup
+Generate the core files to configure and launch the application.
+
+* **Entry Point (`{AppName}Application.java`)**
+    * **Path:** `src/main/java/com/example/myapi/{AppName}Application.java`
+    * **Content:** Use the `@SpringBootApplication` annotation and include the standard `main` method to launch the application.
+
+* **Configuration File (`application.properties`)**
+    * **Path:** `src/main/resources/application.properties`
+    * **Content:** Include the server port configuration, placeholders for the database connection, and the SQL dialect for JPA/Hibernate.
+
+### Feature Implementation (Class Generation)
+Use the following Java package structure. Replace "Entity" with a descriptive name derived from the stored procedure.
+
+* **Class Implementation Details:**
+    * **EntityController:** Implement REST endpoints (`@GetMapping`, etc.) and delegate logic to the `EntityService`.
+    * **EntityHandler (Interface) / EntityHandlerImpl (Class):** The `@Handler` implementation handles business logic and calls the repository.
+    * **EntityRepository:** Create an interface that extends `JpaRepository`. Translate data logic to JPQL queries with the `@Query` annotation or use `EntityManager` for complex queries.
+    * **DTOs and Models:** Create a POJO annotated with `@Entity` for the database model and separate DTOs for API requests and responses. Use validation annotations in request DTOs.

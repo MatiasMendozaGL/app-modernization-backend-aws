@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Repository\**" />
+    <EmbeddedResource Remove="Repository\**" />
+    <None Remove="Repository\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="output_example.txt" />
+    <None Remove="Prompts\DotNet_Instructions.txt" />
+    <None Remove="Prompts\Java_Instructions.txt" />
+	<None Remove="Prompts\promptGeminiGral.txt" />
+	<None Remove="Prompts\promptGeminiJava.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="output_example.txt" />
+    <EmbeddedResource Include="Prompts\CodeGeneration_Template_Prompt.txt" />
+    <EmbeddedResource Include="Prompts\DotNet_Instructions.txt" />
+    <EmbeddedResource Include="Prompts\Java_Instructions.txt" />
+    <EmbeddedResource Include="Prompts\promptGeminiJava.txt" />
+    <EmbeddedResource Include="Prompts\PromptImproved-Gemini.txt" />
+    <EmbeddedResource Include="Prompts\promptGeminiSpecific.txt" />
+	<EmbeddedResource Include="Prompts\promptGeminiGral.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.BedrockRuntime" Version="4.0.4.1" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.6.9" />
+    <PackageReference Include="BCrypt.Net-Core" Version="1.6.0" />
+    <PackageReference Include="Google.Cloud.AIPlatform.V1" Version="3.35.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.6" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.12.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SQLMigrationAssistant.Application\SQLMigrationAssistant.Application.csproj" />
+  </ItemGroup>
+
+</Project>

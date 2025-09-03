@@ -1,0 +1,34 @@
+﻿### Project and Solution File Generation
+Generate the following project and solution files necessary to build and run the application.
+
+* **Solution File (`{AppName}.Api.sln`)**
+    * **Path:** `{AppName}.Api.sln`
+    * **Content:** Use a standard Visual Studio 2022 format and generate a unique Project Guid.
+
+* **Project File (`{AppName}.Api.csproj`)**
+    * **Path:** `{AppName}.Api/{AppName}.Api.csproj`
+    * **Content:** It must target .NET 8.0, enable implicit usings and nullable contexts. Include NuGet package references for `Swashbuckle.AspNetCore`, `SqlKata`, `SqlKata.Execution`, and `Dapper`.
+
+### Application Configuration and Startup
+Generate the core files to configure and launch the application.
+
+* **Entry Point (`Program.cs`)**
+    * **Path:** `{AppName}.Api/Program.cs`
+    * **Content:** Use the minimal hosting model, register all generated services for dependency injection, configure Swagger/OpenAPI, and the HTTP request pipeline.
+
+* **Configuration File (`appsettings.json`)**
+    * **Path:** `{AppName}.Api/appsettings.json`
+    * **Content:** Include logging configurations and a placeholder for the database connection string.
+
+* **Launch Settings (`launchSettings.json`)**
+    * **Path:** `{AppName}.Api/Properties/launchSettings.json`
+    * **Content:** Configure profiles for IIS Express and Kestrel.
+
+### Feature Implementation (Class Generation)
+Deduce the primary business entity (e.g., "User", "Product", "Order") by analyzing the stored procedure's content. Pay close attention to the main tables being queried (FROM) or modified (INSERT INTO, UPDATE). Use this deduced name to replace "Entity" in all class and folder names.
+
+* **Class Implementation Details:**
+    * **EntityController:** Implement REST endpoints that correspond to the distinct operational actions identified in the stored procedure's logic (e.g., data retrieval, creation, modification).
+    * **IEntityHandler / EntityHandler:** Handle business logic, validations, and data orchestration.
+    * **EntityRepository:** Translate the data manipulation logic to {TARGET_LANGUAGE} using the SqlKata query builder.
+    * **DTOs/Models/Responses:** Create data objects for requests, entities, and responses.

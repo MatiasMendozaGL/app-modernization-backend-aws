@@ -1,0 +1,110 @@
+﻿Given the stored procedure code in {SP_CODE}, and acting as an experienced Java software architect, migrate the procedure to a complete and functional Java Spring Boot 3 Web API solution. Follow all best practices and the detailed instructions below.
+
+1. Core Logic Migration
+Analyze the {SP_CODE} and perform the following tasks:
+
+Identify input parameters, validations, main processes, and logic branches.
+
+Detail any significant operations like dynamic SQL, temporary tables, or cursors that need special handling in Java.
+
+Analyze the purpose of the _sp_type variable, if present, to determine the different actions (e.g., Get, Save, Update, Delete) to be implemented as distinct API endpoints.
+
+Translate the core SQL logic into Java classes, adhering to the specified architecture.
+
+2. Project Build File Generation
+Generate the pom.xml file necessary to build and run the application using Apache Maven.
+
+File Path: pom.xml
+
+Content:
+
+Use spring-boot-starter-parent for dependency management.
+
+Set the Java version to 17 or higher.
+
+Define project metadata like groupId (e.g., com.example) and artifactId (e.g., my-api).
+
+Include necessary dependencies for a modern web application:
+
+spring-boot-starter-web: For building RESTful web services.
+
+spring-boot-starter-data-jpa: For data access using the Java Persistence API (JPA).
+
+spring-boot-starter-validation: For request data validation.
+
+springdoc-openapi-starter-webmvc-ui: For automatic Swagger/OpenAPI documentation.
+
+A suitable JDBC driver (e.g., postgresql, mysql-connector-java, or h2database for an in-memory option).
+
+lombok: To reduce boilerplate code (getters, setters, constructors).
+
+3. Application Configuration and Startup
+Generate the core files required to configure and launch the web application.
+
+Application Entry Point ({AppName}Application.java)
+Create the main entry point for the application to configure services and the HTTP pipeline.
+
+File Path: src/main/java/com/example/myapi/{AppName}Application.java
+
+Content:
+
+Use the @SpringBootApplication annotation.
+
+Include the standard public static void main(String[] args) method to launch the application using SpringApplication.run().
+
+Configuration File (application.properties)
+Create the primary configuration file.
+
+File Path: src/main/resources/application.properties
+
+Content:
+
+Include standard server configurations (e.g., server.port=8080).
+
+Provide placeholder properties for the database connection: spring.datasource.url, spring.datasource.username, spring.datasource.password.
+
+Configure JPA/Hibernate properties, such as the SQL dialect (spring.jpa.database-platform).
+
+4. Feature Implementation (Class Generation)
+Use the following Java package structure and guidelines. Replace Entity with a descriptive name derived from the stored procedure (e.g., from sp_user_process to User).
+
+Package Structure:
+
+src/main/java/com/example/myapi/
+├── {AppName}Application.java
+├── config/                  // (Optional: For beans like ModelMapper)
+├── feature/
+│   └── entity/
+│       ├── EntityController.java
+│       ├── EntityService.java
+│       ├── impl/
+│       │   └── EntityServiceImpl.java
+│       ├── model/
+│       │   ├── Entity.java         // JPA @Entity
+│       │   └── dto/
+│       │       ├── EntityRequest.java
+│       │       └── EntityResponse.java
+│       └── repository/
+│           └── EntityRepository.java
+└── exception/               // (For custom exception handlers)
+
+Class Implementation Details:
+
+EntityController: Implement API endpoints (@GetMapping, @PostMapping, etc.) based on the _sp_type logic. This class should be annotated with @RestController. Delegate all business logic to the EntityService. Use DTOs for request bodies and responses.
+
+EntityService (Interface) / EntityServiceImpl (Class): Define the interface for the business logic and provide its implementation. The EntityServiceImpl class, annotated with @Service, will handle business logic, validation, and orchestrate data access by calling the repository.
+
+EntityRepository: Create a Java interface that extends JpaRepository<Entity, ID_TYPE>. Translate the stored procedure's data retrieval and manipulation logic into JPQL queries using the @Query annotation. For complex dynamic SQL, inject the EntityManager to build criteria queries.
+
+DTOs and Models:
+
+model/Entity.java: Create a POJO (Plain Old Java Object) representing the database table, annotated with @Entity.
+
+model/dto/*.java: Create separate POJOs for API requests (EntityRequest) and responses (EntityResponse) to decouple the API contract from the database schema. Use Jakarta Validation annotations (@NotNull, @Size, etc.) in request DTOs.
+
+5. Output Formatting
+Do not give additional explanations. Provide only the final output of the generated classes. For every generated file, including pom.xml, .properties, and .java files, use the following format. Replace path/filename.extension with the correct relative path and file name for each block.
+
+--START NEW BLOCK FOR path/filename.extension--
+... file content here ...
+--END NEW BLOCK FOR path/filename.extension--

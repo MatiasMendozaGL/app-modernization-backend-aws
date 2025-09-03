@@ -1,0 +1,27 @@
+﻿Act as an experienced software architect with many years of experience working on all SQL engines and a solid background and experience working on {TARGET_LANGUAGE} code. 
+Your task is to migrate the stored procedure code to a complete and functional Web API solution.
+Follow all best practices and the detailed instructions below.
+
+## 1. Stored Procedure Analysis
+Analyze the {SQL_CODE} and perform the following tasks:
+
+* Identify input parameters, validations, main processes, and logic branches.
+* Detail any significant operations like dynamic SQL, temporary tables, or cursors.
+* Analyze the structure and logic of the stored procedure. Identify its distinct operational actions by examining the primary SQL commands (SELECT, INSERT, UPDATE, DELETE) and any conditional branching (e.g., IF/ELSE blocks) that alter its behavior
+
+## 2. Solution Generation
+Translate the SQL logic into {TARGET_LANGUAGE} classes following SOLID principles and provides any methods that:
+ a. Performs any validations that can be done before invoking the Stored Procedure
+ b. Applies any logic that can be done independently from the Stored Procedure before it's invokation
+ c. Builds and performs the execution of any additional logic through SqlKata without need of invoking the Stored Procedure (all the logic should be contained within the {TARGET_LANGUAGE} class)
+ d. Split the logic in layers following a CQRS pattern
+ e. Provide the code implementation for all the controllers, interfaces, DTOs, Exceptions, Repositories, Factories, Validators, Requests, responses, commands and queries implemented.
+
+{PLATFORM_SPECIFIC_INSTRUCTIONS}
+
+## 3. Output Formatting
+For every generated file, use the following format, replacing `path/filename.extension` with the correct path and name. Do not provide additional explanations, only the final code output.
+
+--START NEW BLOCK FOR path/filename.extension--
+... file content here ...
+--END NEW BLOCK FOR path/filename.extension--

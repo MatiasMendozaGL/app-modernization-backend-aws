@@ -1,0 +1,136 @@
+﻿Given the stored procedure code
+{SP_CODE}
+Suppose you are a software architect with many years of experience working on all SQL engines and a solid background and experience working on {TARGET_LANGUAGE} code and .Net framework, with a great knowledge of best practices perform the following tasks. Migrate the store procedure to {TARGET_LANGUAGE} using the following guidelines:
+1. Analyze the SQL Script and identify input parameters (declared variables that are likely procedure parameters), validations performed on these inputs and other data, identify the main processes and logic branches based on input conditions. Detail any other significant operations (e.g., dynamic SQL, temporary tables, cursor usage).
+Analyze the sql purpose related to the @_sp_type variable. 
+Use the following structure as an example to create the classes.
+## **Folder Structure**
+```
+Payrailz.Api
+├── Common
+├── Features
+│   ├── Common
+│   │   └── Validators
+│   ├── Fsps
+│   │   ├── EntityName
+│   │   │   ├── Controllers
+│   │   │   ├── Handlers
+│   │   │   ├── Models
+│   │   │   ├── QueryParameters
+│   │   │   └── Responses
+├── Infrastructure
+│   ├── DataAccess
+│   │   └── Interfaces
+│   ├── Shaper
+├── Models
+```
+Take this structure to implement the classes converted from MySql to {TARGET_LANGUAGE} logic as part of a structured {TARGET_LANGUAGE} API solution 
+that follows a modular and layered architecture. Below is a description of the folder structure based on the namespaces, along with an explanation of their purpose and implementation.
+Replace "Entity" with the stored procedure name removing the prefix "sp_" and the sufix "_process".
+---
+## **Namespace Breakdown and Implementation**
+### ** `Payrailz.Api.Features.Fsps.Entity`**
+- **Folder**: `Features/Fsps/Entity`
+- **Purpose**: This is the main namespace for the new classes and its related components. Entity should be replaced with the name of the sql file removing the sp_ prefix and the _process subfix. 
+          It encapsulates all logic specific to the "Entity" feature.
+- **Subfolders**:
+  - **Controllers**: Contains the `EntityController` class, which defines the API endpoints and handles HTTP requests.
+  - **Handlers**: Contains the `IEntityHandler` interface and its implementation, which manage business logic and interact with the data access layer.
+  - **Models**: Defines the domain models and data structures used in the feature.
+  - **QueryParameters**: Contains classes like `EntityQueryParameters` to handle query string and route parameters.
+  - **Responses**: Defines response models for structuring the JSON output.
+---
+### ** `Payrailz.Api.Common`**
+- **Folder**: `Common`
+- **Purpose**: Contains shared utilities and base classes used across the application.
+- **Usage in Controller**:
+  - The `BaseController` class is inherited by `EntityController` to provide common functionality like logging and error handling.
+---
+### ** `Payrailz.Api.Features.Common.Validators`**
+- **Folder**: `Features/Common/Validators`
+- **Purpose**: Contains validators for attributes, expand parameters, and other common validation logic.
+- **Usage in Controller**:
+  - `IRequestedAttributesValidator` and `IRequestedExpandValidator` are used to validate the `attributes` and `expand` query parameters against allowed values.
+- **Example**:
+  ```csharp
+  this.requestedAttributesValidator.Validate(queryParams.Attributes, AllowedAttributes);
+  this.requestedExpandValidator.Validate(queryParams.Expand, AllowedExpand);
+  ```
+---
+### ** `Payrailz.Api.Infrastructure.DataAccess.Interfaces`**
+- **Folder**: `Infrastructure/DataAccess/Interfaces`
+- **Purpose**: Defines interfaces for data access layers, enabling interaction with the database.
+- **Usage in Controller**:
+  - `IDb000DataAccess` and `IDB00XDataAccessFactory` are used to retrieve, save, update and delete data from the database.
+- **Example**:
+  - `IDB00XDataAccessFactory` creates data access objects for querying the database.
+---
+### ** `Payrailz.Api.Infrastructure.Shaper`**
+- **Folder**: `Infrastructure/Shaper`
+- **Purpose**: Provides utilities for shaping and filtering data in the response.
+- **Usage in Controller**:
+  - `IModelShaper` is used to shape the response data based on the requested attributes.
+  - `IModelShaperExclusionBuilder` builds a list of properties to exclude from the response.
+- **Example**:
+  ```csharp
+  var excludedProperties = await this.modelShaperExclusionBuilder.Build(queryParams.Expand);
+  string json = this.modelShaper.ShapeData(listResponse, "modela2atransfer", queryParams.Attributes, string.Join(",", excludedProperties));
+  ```
+---
+### ** `Payrailz.Api.Models`**
+- **Folder**: `Models`
+- **Purpose**: Contains shared models used across the application.
+- **Usage in Controller**:
+  - The `Error` model is used to return error responses.
+- **Example**:
+  ```csharp
+  var error = new Error()
+  {
+      Number = 2043,
+      Message = "not found (no modela2atransfer data to return)",
+  };
+  ```
+---
+Implement the following classes for the logic related to values found for the @_sp_type variable.
+### **Controller (e, g: `EntityController`)**
+ Implement a Controller following this guidelines:
+ - Based on the Define and implements the endpoints for retrieving, saving, updating or deleting the entity according to the logic implement in the stored procedure.
+If procedure doesn't explicitly define parameters, based on the DECLARE statements and how they are used infer the intended inputs.
+ - In the implementation of each endpoint validate query parameters
+ - Validate query parameter using functions like the one that starts with 'zproc_qp' with the classes:
+ - Validate the scope of the request using helper procedure like the ones that start with 'zproc_validate'
+ - Delegate business logic to the handler (`IEntityHandler`).
+ - Shape and return the response using `IModelShaper`.
+### **Handler (e, g: `IEntityHandler`)**
+ Implement the Handler class to support retrieving, saving, updating or deleting database stored data, taking into account the following guidelines:
+  - Query parameter handling and database interaction.
+  - Caching for frequently accessed data.
+  - Decryption of sensitive fields.
+  - Mapping DTOs (Data Transfer Objects) to domain models.
+  - Implement {TARGET_LANGUAGE} methods to perform validations that can be done before database interaction
+  -  Implement {TARGET_LANGUAGE} methods for any logic that can be executed independently of the database before the main data retrieval.
+  - Interact with the data access layer to fetch data.
+  - Apply business rules (e.g., caching, decryption).
+  - Return processed data to the controller.
+### **QueryParameters (e, g: `EntityQueryParameters`)**
+ Implement a queryParameter class that encapsulates query string and route parameters for the API, so it can be used to:
+  - Map query parameters like `offset`, `limit`, `order`, etc.
+  - Provide a structured way to pass parameters to the handler.
+### **Data Access Layer (`EntityDataAccess`)**
+Implement the access to the database, the retrieval, update, delete of the database in a dataAccess class in {TARGET_LANGUAGE} replicating the functionality of the stored procedure in a more modern, object-oriented approach.
+- Translate the core data retrieval logic of the stored procedure into SqlKata queries.
+- This will involve replicating the dynamic SQL construction for filtering and ordering.
+### **Shaper (`IModelShaper`)**
+- **Purpose**: Shapes the response data based on requested attributes and exclusions.
+- **Responsibilities**:
+  1. Filter response data to include only the requested attributes.
+  2. Exclude properties based on the `expand` parameter.
+### **DTO**
+- Implement DTOs for the controller, entities or DTOs for data transfer.
+Do not give additional explanations. Provide only the final output of the generated classes
+Insert an text at the beginning of each file in the following format:
+--START NEW BLOCK FOR path/filename.extension--
+Where path/filename.extension should be replaced with the complete file path and filename, including the extension.
+Insert an text at the end of each file in the following format:
+--END NEW BLOCK FOR path/filename.extension--
+Where path/filename.extension should be replaced with the same complete file path and filename used in the beginning comment.

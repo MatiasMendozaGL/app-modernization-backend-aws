@@ -1,0 +1,125 @@
+﻿Given the stored procedure code in {SP_CODE}, and acting as an experienced software architect, migrate the procedure to a complete and functional {TARGET_LANGUAGE} .NET 8 Web API solution. Follow all best practices and the detailed instructions below.
+
+1. Core Logic Migration
+Analyze the {SP_CODE} and perform the following tasks:
+
+Identify input parameters, validations, main processes, and logic branches.
+
+Detail any significant operations like dynamic SQL, temporary tables, or cursors.
+
+Analyze the purpose of the _sp_type variable, if present, to determine the different actions (e.g., Get, Save, Update, Delete) to be implemented as API endpoints.
+
+Translate the SQL logic into {TARGET_LANGUAGE} classes, adhering to the specified architecture.
+
+2. Solution and Project File Generation
+Generate the following project and solution files necessary to build and run the application.
+
+Solution File (Payrailz.Api.sln)
+Create the main solution file to group all related projects.
+
+File Path: Payrailz.Api.sln
+
+Content: Use a standard Visual Studio 2022 format. Generate a unique Project Guid.
+
+Project File (Payrailz.Api.csproj)
+Create the C# project file that defines project settings and dependencies.
+
+File Path: Payrailz.Api/Payrailz.Api.csproj
+
+Content:
+
+Target .NET 8.0.
+
+Enable implicit usings and nullable contexts.
+
+Include necessary NuGet package references for a Web API, such as:
+
+Swashbuckle.AspNetCore
+
+SqlKata
+
+SqlKata.Execution
+
+Dapper
+
+Any other libraries needed to fulfill the data access requirements.
+
+3. Application Configuration and Startup
+Generate the core files required to configure and launch the web application.
+
+Application Entry Point (Program.cs)
+Create the main entry point for the application to configure services and the HTTP pipeline.
+
+File Path: Payrailz.Api/Program.cs
+
+Content:
+
+Use the minimal hosting model (WebApplication.CreateBuilder).
+
+Register all the generated services for dependency injection (e.g., AddScoped<IEntityHandler, EntityHandler>, AddSingleton<IDB00XDataAccessFactory, ...>).
+
+Add and configure Swagger/OpenAPI for API documentation.
+
+Configure the HTTP request pipeline (e.g., routing, authorization, controller mapping).
+
+Configuration File (appsettings.json)
+Create the primary configuration file.
+
+File Path: Payrailz.Api/appsettings.json
+
+Content: Include standard logging configurations and a placeholder for database connection strings.
+
+Launch Settings (launchSettings.json)
+Create the debug launch profile configuration.
+
+File Path: Payrailz.Api/Properties/launchSettings.json
+
+Content: Configure profiles for running the application with IIS Express and Kestrel, including HTTP/HTTPS ports and environment variables.
+
+4. Feature Implementation (Class Generation)
+Use the following folder structure and guidelines to generate the feature-specific C# classes. Replace "Entity" with the stored procedure's name, removing the sp_ prefix and _process suffix.
+
+Folder Structure
+Payrailz.Api
+├── Common
+├── Properties
+│   └── launchSettings.json
+├── Features
+│   ├── Common
+│   │   └── Validators
+│   ├── Fsps
+│   │   ├── Entity
+│   │   │   ├── Controllers
+│   │   │   ├── Handlers
+│   │   │   ├── Models
+│   │   │   ├── QueryParameters
+│   │   │   └── Responses
+├── Infrastructure
+│   ├── DataAccess
+│   │   └── Interfaces
+│   ├── Shaper
+├── Models
+├── Payrailz.Api.csproj
+├── Program.cs
+└── appsettings.json
+Payrailz.Api.sln
+Class Implementation Details
+EntityController: Implement API endpoints based on the _sp_type logic. Delegate business logic to the IEntityHandler. Use IModelShaper to format the final JSON response.
+
+IEntityHandler / EntityHandler: Implement methods to handle business logic, validations, caching, and data access orchestration.
+
+EntityQueryParameters: Define a class to encapsulate all API query string and route parameters.
+
+EntityDataAccess: Translate the stored procedure's data retrieval and manipulation logic into {TARGET_LANGUAGE} using the SqlKata query builder.
+
+DTOs/Models/Responses: Create plain data objects for requests, database entities, and API responses.
+
+Validators/Shapers/Common: Implement shared utilities as described in the original prompt.
+
+5. Output Formatting
+Do not give additional explanations. Provide only the final output of the generated classes.
+For every generated file, including .sln, .csproj, .json, and .cs files, use the following format. Replace path/filename.extension with the correct relative path and file name for each block.
+
+--START NEW BLOCK FOR path/filename.extension--
+... file content here ...
+--END NEW BLOCK FOR path/filename.extension--

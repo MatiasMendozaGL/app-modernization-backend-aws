@@ -1,0 +1,82 @@
+﻿Given the stored procedure in the {SQL_CODE} file, suppose you are a software architect with many years of experience working on all SQL engines and a solid background and experience working on {TARGET_LANGUAGE} code and .Net framework, with a great knowledge of best practices perform the following tasks.
+
+1. Analyze the SQL script provided above and identify the validations performed, processes performed based on the inputs, any other processes and any operation results and logic that returns something to the user of the stored procedure.
+2. Display the results of your analysis.
+3. Create a {TARGET_LANGUAGE} class that follows SOLID principles and provides a main method and any additional necessary methods that
+ a. Performs any validations that can be done before invoking the Stored Procedure
+ b. Applies any logic that can be done independently from the Stored Procedure before it's invokation
+ c. Builds and performs the execution of any additional logic through SqlKata without need of invoking the Stored Procedure (all the logic should be contained within the {TARGET_LANGUAGE} class)
+ d. Split the logic in layers following a CQRS pattern and expose a Controller endpoint with input parameters (based on the original Stored Procedure) that will be used to call the rest of the methods.
+4.Provide the code implementation for all the controllers, interfaces, DTOs, Exceptions, Repositories, Factories, Validators, Requests, responses, commands and queries implemented.
+
+5. Generate the following project and solution files necessary to build and run the application.
+Solution File (SOLUTION.Api.sln)
+Create the main solution file to group all related projects. Replace SOLUTION with an according name.
+
+File Path: SOLUTION.Api.sln
+
+Content: Use a standard Visual Studio 2022 format. Generate a unique Project Guid.
+
+Project File (SOLUTION.Api.csproj)
+Create the C# project file that defines project settings and dependencies.
+
+File Path: SOLUTION.Api/SOLUTION.Api.csproj
+
+Content:
+
+Target .NET 8.0.
+
+Enable implicit usings and nullable contexts.
+
+Include necessary NuGet package references for a Web API, such as:
+
+Swashbuckle.AspNetCore
+
+SqlKata
+
+SqlKata.Execution
+
+Dapper
+
+Any other libraries needed to fulfill the data access requirements.
+
+
+6. Application Configuration and Startup
+Generate the core files required to configure and launch the web application.
+
+Application Entry Point (Program.cs)
+Create the main entry point for the application to configure services and the HTTP pipeline.
+
+File Path: SOLUTION.Api/Program.cs
+
+Content:
+
+Use the minimal hosting model (WebApplication.CreateBuilder).
+
+Register all the generated services for dependency injection (e.g., AddScoped<IEntityHandler, EntityHandler>).
+
+Add and configure Swagger/OpenAPI for API documentation.
+
+Configure the HTTP request pipeline (e.g., routing, authorization, controller mapping).
+
+Configuration File (appsettings.json)
+Create the primary configuration file.
+
+File Path: SOLUTION.Api/appsettings.json
+
+Content: Include standard logging configurations and a placeholder for database connection strings.
+
+Launch Settings (launchSettings.json)
+Create the debug launch profile configuration.
+
+File Path: SOLUTION.Api/Properties/launchSettings.json
+
+Content: Configure profiles for running the application with IIS Express and Kestrel, including HTTP/HTTPS ports and environment variables.
+
+7. Output Formatting
+Do not give additional explanations. Provide only the final output of the generated classes.
+For every generated file, including .sln, .csproj, .json, and .cs files, use the following format. Replace path/filename.extension with the correct relative path and file name for each block.
+
+--START NEW BLOCK FOR path/filename.extension--
+... file content here ...
+--END NEW BLOCK FOR path/filename.extension--
