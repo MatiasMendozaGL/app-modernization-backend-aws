@@ -12,13 +12,7 @@ builder.Services
         .AddInfrastructureServices(builder.Configuration)
         .AddControllers();
 
-// Cloud Run automatically provides PORT environment variable
-var port = Environment.GetEnvironmentVariable("PORT");
-if (!string.IsNullOrEmpty(port))
-{
-    // Only if the variable PORT exists (as in Cloud Run)
-    builder.WebHost.UseUrls($"http://*:{port}");
-}
+builder.WebHost.UseUrls($"http://*:80");
 
 var app = builder.Build();
 
