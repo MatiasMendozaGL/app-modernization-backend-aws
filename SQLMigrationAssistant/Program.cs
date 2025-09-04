@@ -19,7 +19,7 @@ if (!string.IsNullOrEmpty(port) && int.TryParse(port, out int portNumber))
 }
 else
 {
-    builder.WebHost.UseUrls("http://0.0.0.0:80");
+    builder.WebHost.UseUrls("http://0.0.0.0:8080");
 }
 
 var app = builder.Build();
