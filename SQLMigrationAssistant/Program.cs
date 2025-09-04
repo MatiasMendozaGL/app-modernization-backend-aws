@@ -12,7 +12,12 @@ builder.Services
         .AddInfrastructureServices(builder.Configuration)
         .AddControllers();
 
-builder.WebHost.UseUrls($"http://*:80");
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    // Only if the variable PORT exists
+    builder.WebHost.UseUrls($"http://*:{port}");
+}
 
 var app = builder.Build();
 
