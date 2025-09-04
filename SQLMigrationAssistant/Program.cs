@@ -13,10 +13,13 @@ builder.Services
         .AddControllers();
 
 var port = Environment.GetEnvironmentVariable("PORT");
-if (!string.IsNullOrEmpty(port))
+if (!string.IsNullOrEmpty(port) && int.TryParse(port, out int portNumber))
 {
-    // Only if the variable PORT exists
-    builder.WebHost.UseUrls($"http://*:{port}");
+    builder.WebHost.UseUrls($"http://0.0.0.0:{portNumber}");
+}
+else
+{
+    builder.WebHost.UseUrls("http://0.0.0.0:80");
 }
 
 var app = builder.Build();
