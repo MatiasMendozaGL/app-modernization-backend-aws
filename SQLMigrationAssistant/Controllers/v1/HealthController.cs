@@ -4,7 +4,6 @@ using SQLMigrationAssistant.Application.Common.Interfaces;
 namespace SQLMigrationAssistant.API.Controllers.v1
 {
     [ApiController]
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("api/[controller]")]
     public class HealthController : ControllerBase
     {
