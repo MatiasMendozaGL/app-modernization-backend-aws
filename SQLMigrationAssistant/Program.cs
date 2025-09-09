@@ -24,7 +24,7 @@ else
 
 var app = builder.Build();
 
-app.UseSwagger();
+app.UseSwagger(); 
 app.UseSwaggerUI();
 
 //Enable CORS
